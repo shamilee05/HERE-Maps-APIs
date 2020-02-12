@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+        <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"
+        type="text/javascript" charset="utf-8"></script>
+        <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"
+        type="text/javascript" charset="utf-8"></script>
+        <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"
+        type="text/javascript" charset="utf-8"></script>
+        <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"
+            type="text/javascript" charset="utf-8"></script>
+        <link rel="stylesheet" type="text/css"
+            href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+  </head>
+  <body>
+    <div style="width: 640px; height: 480px" id="mapContainer"></div>
+    <br> <br>
+    <input id="location" type="text"/>
+    <button type="button" id="readButton" onclick="showLocationOnMap()"> Show this location on map</button>
+    <script>
+        function showLocationOnMap() {
+
+             // Instantiate a map and platform object:
+             var platform = new H.service.Platform({
+                'apikey': '9DUwtkuPgW7yQy2dSm0fuVwPA3_AyStENG6zYhYN_Nc'
+            });
+
+            // Get default map types from the platform object:
+            var defaultLayers = platform.createDefaultLayers();
+
+            // Instantiate the map:
+            var map = new H.Map(
+            document.getElementById('mapContainer'),
+            defaultLayers.vector.normal.map,
+            {
+                zoom: 1,
+                center: { lat: 19.076090, lng: 72.877426 }
+            });
+
+            // Enable the event system on the map instance:
+            var mapEvents = new H.mapevents.MapEvents(map);
+
+            // Instantiate the default behavior, providing the mapEvents object:
+            var behavior = new H.mapevents.Behavior(mapEvents);
+
+            // Create the default UI:
+            var ui = H.ui.UI.createDefault(map, defaultLayers);
+
+            var name = document.getElementById("location").value;
+
+            // Create the parameters for the geocoding request:
+            var geocodingParams = {
+                searchText: name,
+                };
+
+            // Define a callback function to process the geocoding response:
+            var onResult = function(result) {
+                var locations = result.Response.View[0].Result,
+                    position,
+                    marker;
+                // Add a marker for each location found
+                for (i = 0;  i < locations.length; i++) {
+                    position = {
+                        lat: locations[i].Location.DisplayPosition.Latitude,
+                        lng: locations[i].Location.DisplayPosition.Longitude
+                    };
+                    marker = new H.map.Marker(position);
+                    map.addObject(marker);
+                }
+            };
+
+            // Get an instance of the geocoding service:
+            var geocoder = platform.getGeocodingService();
+
+            // Call the geocode method with the geocoding parameters,
+            // the callback and an error callback function (called if a
+            // communication error occurs):
+            geocoder.geocode(geocodingParams, onResult, function(e) {
+                alert(e);
+            });
+        }
+    </script>
+  </body>
+</html>
